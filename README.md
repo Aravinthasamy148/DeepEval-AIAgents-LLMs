@@ -40,9 +40,8 @@ they stop being intimidated by component-level evaluation.
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Set your API keys
-export ANTHROPIC_API_KEY=sk-ant-...
-export OPENAI_API_KEY=sk-...
+# 2. Set your Gemini API key (PowerShell)
+$env:GEMINI_API_KEY = "..."
 
 # 3. (Optional but recommended) log in to Confident AI to see traces in a UI
 deepeval login
@@ -50,13 +49,13 @@ deepeval login
 # 4. Sanity check: run the agent on its own
 python agent_instrumented.py
 
-# 5. Run the evaluation
-python test_agent.py
+# 5. Run the Task Completion evaluation
+python test_taskCompletion.py
 ```
 
 ---
 
-## What you'll see when you run `test_agent.py`
+## What you'll see when you run `test_taskCompletion.py`
 
 DeepEval will:
 1. Invoke `support_agent(...)` for each golden input

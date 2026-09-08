@@ -10,7 +10,7 @@ pip install -r requirements.txt
 
 Create a `.env` file (already gitignored) with:
 ```
-OPENAI_API_KEY=sk-...               # agent LLM + judge LLM (GPT-4o)
+GEMINI_API_KEY=...                  # agent and Task Completion judge
 CONFIDENT_API_KEY=confident_us_...  # optional: stream traces to Confident AI dashboard
 ```
 
@@ -20,7 +20,7 @@ CONFIDENT_API_KEY=confident_us_...  # optional: stream traces to Confident AI da
 # Phase 1 — tool-calling support agent
 python agent_instrumented.py          # sanity-check the agent alone
 
-python test_agent.py                  # TaskCompletion + ToolCorrectness
+python test_taskCompletion.py         # TaskCompletion
 python test_agent_extended.py         # AnswerRelevancy + PromptAlignment + StepEfficiency
 python test_agent_correctness.py      # GEval correctness against expected_output
 
