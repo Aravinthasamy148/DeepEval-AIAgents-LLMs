@@ -18,15 +18,14 @@ What's new vs agent_instrumented.py:
 """
 
 import os
+import re
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from langchain_core.tools import tool
-from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import OpenAIEmbeddings
 from langchain.agents import create_agent
 
 from deepeval.integrations.langchain import CallbackHandler
@@ -78,11 +77,14 @@ POLICY_DOCS = [
 
 
 # ---------------------------------------------------------------------------
-# Build the vector store once at import time.
+# Build the local retrieval index once at import time. Keeping retrieval local
+# makes the RAG agent runnable with the Gemini key used by the answer model.
 # ---------------------------------------------------------------------------
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-vector_store = InMemoryVectorStore(embedding=embeddings)
-vector_store.add_texts(POLICY_DOCS)
+_TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
+_POLICY_INDEX = [
+    (document, set(_TOKEN_PATTERN.findall(document.lower())))
+    for document in POLICY_DOCS
+]
 
 
 # ---------------------------------------------------------------------------
@@ -97,8 +99,13 @@ _last_retrieved: list[str] = []
 def search_policies(query: str) -> str:
     """Search the customer-support knowledge base for policy information."""
     global _last_retrieved
-    docs = vector_store.similarity_search(query, k=3)
-    chunks = [doc.page_content for doc in docs]
+    query_tokens = set(_TOKEN_PATTERN.findall(query.lower()))
+    ranked_documents = sorted(
+        _POLICY_INDEX,
+        key=lambda item: len(query_tokens & item[1]),
+        reverse=True,
+    )
+    chunks = [document for document, _ in ranked_documents[:3]]
     _last_retrieved = chunks
     return "\n\n".join(chunks)
 
